@@ -1,5 +1,6 @@
 const express = require("express");
 const passport = require("passport");
+const bcrypt = require("bcryptjs");
 
 // check if credentials are valid
 exports.logUserIn = function (req, res, next) {
@@ -13,26 +14,26 @@ exports.logUserIn = function (req, res, next) {
 };
 
 exports.loginSuccess = function (req, res, next) {
-  const message = {
-    loginOutcome: true,
-  };
-  res.json({
-    message,
+  res.send({
+    requestOutcome: true,
+    message: "You have been logged in",
   });
 };
 
 exports.loginFailure = function (req, res, next) {
-  const message = {
-    loginOutcome: false,
-  };
-  res.json({
-    message,
+  res.send({
+    requestOutcome: false,
+    message: "Error logging in",
   });
 };
 
 exports.createUserAccount = function (req, res, next) {
-  console.log(req.body.username, req.body.password);
-  createUser(req.body.username, req.body.password).then((data) => {
-    res.send(data);
+  bcrypt.hash(req.body.password, 10, (err, hashedPassword) => {
+    if (err) {
+      return next(err);
+    }
+    createUser(req.body.username, hashedPassword).then((data) => {
+      res.send(data);
+    });
   });
 };

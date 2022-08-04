@@ -18,7 +18,7 @@ var usersRouter = require("./routes/users");
 var apiRouter = require("./routes/api");
 
 var app = express();
-const port = process.env.PORT || 5001;
+// const port = process.env.PORT || 5001;
 
 passport.use(
   new LocalStrategy((username, password, done) => {
@@ -28,16 +28,20 @@ passport.use(
         console.log("2222222");
         return done(null, false, { message: "Incorrect username" });
       }
-      if (userData.password === password) {
-        console.log("33333333");
-        const user = {
-          id: userData.id,
-        };
-        return done(null, user);
-      } else {
-        console.log("444444444");
-        return done(null, false, { message: "Incorrect password" });
-      }
+      bcrypt.compare(password, userData.password, (err, res) => {
+        if (res) {
+          // passwords match! log user in
+          console.log("33333333");
+          const user = {
+            id: userData.id,
+          };
+          return done(null, user);
+        } else {
+          // passwords do not match!
+          console.log("444444444");
+          return done(null, false, { message: "Incorrect password" });
+        }
+      });
     });
     console.log("5555555555");
   })
@@ -102,7 +106,5 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500);
   res.render("error");
 });
-
-app.listen(port, () => console.log(`Listening on port ${port}`));
 
 module.exports = app;
