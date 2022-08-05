@@ -1,7 +1,6 @@
 const express = require("express");
 const getCashAccountDataFromDB = require("../modules/database_actions");
 
-// check if credentials are valid
 exports.getCashAccountData = function (req, res, next) {
   const cashAccountData = getCashAccountDataFromDB(
     res.locals.currentUser.id
@@ -10,9 +9,11 @@ exports.getCashAccountData = function (req, res, next) {
   });
 };
 
-exports.loginSuccess = function (req, res, next) {
-  res.send({
-    requestOutcome: true,
-    message: "You have been logged in",
+exports.updateAccountBalance = function (req, res, next) {
+  const updateBalanceRequest = updateAccountBalanceToDB(
+    req.body.account_id,
+    req.body.balance
+  ).then((data) => {
+    res.send(data);
   });
 };

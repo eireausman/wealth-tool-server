@@ -12,4 +12,9 @@ router.post("/createaccount", userController.createUserAccount);
 
 router.get("/getcashaccountdata", dbQueryController.getCashAccountData);
 
+router.post(
+  "/updatecashaccountbalance",
+  dbQueryController.updateAccountBalance
+);
+
 module.exports = router;

@@ -12,9 +12,14 @@ const sequelize = new Sequelize(
 
 const User = require("../models/user")(sequelize);
 const CashAccount = require("../models/cashAccounts")(sequelize);
+const CashAccountBalances = require("../models/cashAccountsBalances")(
+  sequelize
+);
 
 CashAccount.belongsTo(User);
 User.hasMany(CashAccount);
+CashAccount.hasMany(CashAccountBalances);
+CashAccountBalances.belongsTo(CashAccount);
 
 const connectoDB = async () => {
   try {
@@ -81,6 +86,29 @@ module.exports = createUser = async (sent_username, sent_password) => {
   return message;
 
   // 'catch' appears to be resolved by sequelize
+};
+
+module.exports = updateAccountBalanceToDB = async (accountID, balance) => {
+  const today = new Date();
+  try {
+    const newCashAccountBalances = await CashAccountBalances.create({
+      account_id: accountID,
+      account_balance: balance,
+      account_balance_asatdate: today,
+    });
+
+    await newCashAccountBalances.save();
+    await CashAccount.update(
+      {
+        account_balance: balance,
+      },
+      {
+        where: { account_id: accountID },
+      }
+    );
+  } catch (err) {
+    return err;
+  }
 };
 
 module.exports = getCashAccountDataFromDB = async (reslocalsuser) => {

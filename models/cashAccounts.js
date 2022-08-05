@@ -34,6 +34,17 @@ module.exports = (sequelize) => {
           },
         },
       },
+      account_balance: {
+        type: Sequelize.INTEGER,
+        unique: true,
+        allowNull: false,
+        validate: {
+          isInt: {
+            args: true,
+            msg: "Balance must be a number (integer).",
+          },
+        },
+      },
       account_currency: {
         type: Sequelize.STRING,
         allowNull: false,
