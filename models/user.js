@@ -14,18 +14,26 @@ module.exports = (sequelize) => {
         unique: true,
 
         allowNull: false,
-        validate: { len: [3, 35] },
+        validate: {
+          len: {
+            args: [3, 35],
+            msg: "Username must be between 3 and 35 characters.",
+          },
+        },
       },
       users_password: {
         type: Sequelize.STRING,
-
         allowNull: false,
-        validate: { len: [8, 256] },
+        len: {
+          args: [8, 256],
+          msg: "Password must be at least 8 charcters long.",
+        },
       },
     },
     {
       timestamps: false,
     }
   );
+
   return User;
 };
