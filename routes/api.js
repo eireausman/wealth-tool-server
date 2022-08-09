@@ -14,6 +14,8 @@ router.get("/getpropertiesdata", dbQueryController.getPropertiesData);
 
 router.get("/getcashaccountdata", dbQueryController.getCashAccountData);
 
+router.post("/getfxrates", dbQueryController.getFXRate);
+
 router.post(
   "/updatecashaccountbalance",
   dbQueryController.updateAccountBalance

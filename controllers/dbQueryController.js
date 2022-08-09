@@ -24,3 +24,13 @@ exports.getPropertiesData = function (req, res, next) {
     }
   );
 };
+
+exports.getFXRate = function (req, res, next) {
+  const currencyFXData = getFXRateFromDB(
+    req.body.currencyFrom,
+    req.body.currencyTo
+  ).then((data) => {
+    console.log(data);
+    res.send(data);
+  });
+};

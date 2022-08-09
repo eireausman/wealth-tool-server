@@ -16,6 +16,7 @@ const CashAccountBalances = require("../models/cashAccountsBalances")(
   sequelize
 );
 const Properties = require("../models/Properties")(sequelize);
+const Currencies = require("../models/currencies")(sequelize);
 
 User.hasMany(CashAccount, { foreignKey: "userUsersId" });
 CashAccount.belongsTo(User, { foreignKey: "userUsersId" });
@@ -29,6 +30,7 @@ User.sync();
 CashAccount.sync();
 CashAccountBalances.sync();
 Properties.sync();
+Currencies.sync();
 
 const connectoDB = async () => {
   try {
@@ -97,6 +99,21 @@ module.exports = createUser = async (sent_username, sent_password) => {
   // 'catch' appears to be resolved by sequelize
 };
 
+module.exports = getFXRateFromDB = async (from, to) => {
+  try {
+    const currenciesQuery = await Currencies.findOne({
+      where: {
+        currency_code_from: from,
+        currency_code_to: to,
+      },
+      order: [["currency_fxrate_dateupdated", "DESC"]],
+    });
+    return currenciesQuery;
+  } catch (error) {
+    return error;
+  }
+};
+
 module.exports = updateAccountBalanceToDB = async (accountID, balance) => {
   const today = new Date();
   try {
@@ -130,7 +147,6 @@ module.exports = getPropertyDataFromDB = async (reslocalsuser) => {
       },
     });
     // returns an array of properties owned by the current user
-    console.log("got here - PROPERTY");
     return usersPropertyData.properties;
   } catch (err) {
     return err;
@@ -146,7 +162,6 @@ module.exports = getCashAccountDataFromDB = async (reslocalsuser) => {
         users_id: reslocalsuser,
       },
     });
-    console.log("got here - CASH");
     // returns an array of accounts owned by the current user
     return usersCashAccounts.cash_accounts;
   } catch (err) {
