@@ -5,7 +5,6 @@ var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 cors = require("cors");
-require("./modules/database_actions");
 
 const bcrypt = require("bcryptjs");
 const session = require("express-session");
@@ -18,7 +17,6 @@ var usersRouter = require("./routes/users");
 var apiRouter = require("./routes/api");
 
 var app = express();
-// const port = process.env.PORT || 5001;
 
 passport.use(
   new LocalStrategy((username, password, done) => {
@@ -78,7 +76,7 @@ app.use(function (req, res, next) {
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "pug");
+app.set("view engine", "jade");
 
 app.use(logger("dev"));
 app.use(express.json());

@@ -1,31 +1,31 @@
 const { Sequelize, Op, Model, DataTypes } = require("sequelize");
 
 module.exports = (sequelize) => {
-  const CashAccount = sequelize.define(
-    "cash_accounts",
+  const Properties = sequelize.define(
+    "properties",
     {
-      account_id: {
+      property_id: {
         type: Sequelize.INTEGER,
-        autoIncrement: true,
         unique: true,
+        autoIncrement: true,
         primaryKey: true,
       },
       userUsersId: {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
-      account_nickname: {
+      property_nickname: {
         type: Sequelize.STRING,
         unique: true,
         allowNull: false,
         validate: {
           len: {
             args: [3, 35],
-            msg: "Nickname must be between 3 and 20 characters in length.",
+            msg: "Property name must be between 3 and 20 characters in length.",
           },
         },
       },
-      account_owner_name: {
+      property_owner_name: {
         type: Sequelize.STRING,
         allowNull: false,
         validate: {
@@ -35,7 +35,7 @@ module.exports = (sequelize) => {
           },
         },
       },
-      account_balance: {
+      property_valuation: {
         type: Sequelize.INTEGER,
         allowNull: false,
         validate: {
@@ -45,7 +45,17 @@ module.exports = (sequelize) => {
           },
         },
       },
-      account_currency: {
+      property_loan_value: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        validate: {
+          isInt: {
+            args: true,
+            msg: "Loan amount must be a number (integer).",
+          },
+        },
+      },
+      property_valuation_currency: {
         type: Sequelize.STRING,
         allowNull: false,
         validate: {
@@ -61,5 +71,5 @@ module.exports = (sequelize) => {
     }
   );
 
-  return CashAccount;
+  return Properties;
 };

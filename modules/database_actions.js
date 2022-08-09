@@ -15,11 +15,20 @@ const CashAccount = require("../models/cashAccounts")(sequelize);
 const CashAccountBalances = require("../models/cashAccountsBalances")(
   sequelize
 );
+const Properties = require("../models/Properties")(sequelize);
 
-CashAccount.belongsTo(User);
-User.hasMany(CashAccount);
-CashAccount.hasMany(CashAccountBalances);
-CashAccountBalances.belongsTo(CashAccount);
+User.hasMany(CashAccount, { foreignKey: "userUsersId" });
+CashAccount.belongsTo(User, { foreignKey: "userUsersId" });
+User.hasMany(Properties, { foreignKey: "userUsersId" });
+CashAccount.hasMany(CashAccountBalances, { foreignKey: "account_id" });
+
+CashAccountBalances.belongsTo(CashAccount, { foreignKey: "account_id" });
+Properties.belongsTo(User, { foreignKey: "userUsersId" });
+
+User.sync();
+CashAccount.sync();
+CashAccountBalances.sync();
+Properties.sync();
 
 const connectoDB = async () => {
   try {
@@ -111,6 +120,23 @@ module.exports = updateAccountBalanceToDB = async (accountID, balance) => {
   }
 };
 
+module.exports = getPropertyDataFromDB = async (reslocalsuser) => {
+  try {
+    const usersPropertyData = await User.findOne({
+      attributes: ["users_id"],
+      include: Properties,
+      where: {
+        users_id: reslocalsuser,
+      },
+    });
+    // returns an array of properties owned by the current user
+    console.log("got here - PROPERTY");
+    return usersPropertyData.properties;
+  } catch (err) {
+    return err;
+  }
+};
+
 module.exports = getCashAccountDataFromDB = async (reslocalsuser) => {
   try {
     const usersCashAccounts = await User.findOne({
@@ -120,6 +146,7 @@ module.exports = getCashAccountDataFromDB = async (reslocalsuser) => {
         users_id: reslocalsuser,
       },
     });
+    console.log("got here - CASH");
     // returns an array of accounts owned by the current user
     return usersCashAccounts.cash_accounts;
   } catch (err) {

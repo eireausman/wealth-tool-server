@@ -4,14 +4,17 @@ module.exports = (sequelize) => {
   const CashAccountBalances = sequelize.define(
     "cash_accounts_balances",
     {
+      id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+      },
       account_id: {
         type: Sequelize.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
+        allowNull: false,
       },
       account_balance: {
         type: Sequelize.INTEGER,
-        unique: true,
         allowNull: false,
         validate: {
           isInt: {
