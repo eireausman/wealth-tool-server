@@ -1,8 +1,8 @@
 const { Sequelize, Op, Model, DataTypes } = require("sequelize");
 
 module.exports = (sequelize) => {
-  const Currency = sequelize.define(
-    "currencies_fx",
+  const CurrencyCode = sequelize.define(
+    "currencies_codes",
     {
       id: {
         type: Sequelize.INTEGER,
@@ -10,7 +10,17 @@ module.exports = (sequelize) => {
         unique: true,
         primaryKey: true,
       },
-      currency_code_from: {
+      currency_name: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        validate: {
+          len: {
+            args: [3 - 35],
+            msg: "Code must be between 3 and 35 characters in length.",
+          },
+        },
+      },
+      currency_code: {
         type: Sequelize.STRING,
         allowNull: false,
         validate: {
@@ -20,33 +30,13 @@ module.exports = (sequelize) => {
           },
         },
       },
-      currency_code_to: {
+      currency_symbol: {
         type: Sequelize.STRING,
         allowNull: false,
         validate: {
           len: {
-            args: [3],
-            msg: "Code must be 3 characters in length.",
-          },
-        },
-      },
-      currency_fxrate: {
-        type: Sequelize.FLOAT,
-        allowNull: false,
-        validate: {
-          isFloat: {
-            args: true,
-            msg: "FX Rate must be a date",
-          },
-        },
-      },
-      currency_fxrate_dateupdated: {
-        type: Sequelize.DATEONLY,
-        allowNull: false,
-        validate: {
-          isDate: {
-            args: true,
-            msg: "Updated date must be a date",
+            args: [1],
+            msg: "Symbol must be 3 characters in length.",
           },
         },
       },
@@ -56,5 +46,5 @@ module.exports = (sequelize) => {
     }
   );
 
-  return Currency;
+  return CurrencyCode;
 };

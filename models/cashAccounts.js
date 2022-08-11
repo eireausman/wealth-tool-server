@@ -45,7 +45,17 @@ module.exports = (sequelize) => {
           },
         },
       },
-      account_currency: {
+      account_currency_code: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        validate: {
+          len: {
+            args: [3, 3],
+            msg: "Currency value must be 3 characters long.",
+          },
+        },
+      },
+      account_currency_symbol: {
         type: Sequelize.STRING,
         allowNull: false,
         validate: {

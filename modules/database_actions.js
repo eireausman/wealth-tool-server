@@ -16,7 +16,8 @@ const CashAccountBalances = require("../models/cashAccountsBalances")(
   sequelize
 );
 const Properties = require("../models/Properties")(sequelize);
-const Currencies = require("../models/currencies")(sequelize);
+const Currencies = require("../models/currencies_fx")(sequelize);
+const CurrencyCodes = require("../models/currencies_codes")(sequelize);
 
 User.hasMany(CashAccount, { foreignKey: "userUsersId" });
 CashAccount.belongsTo(User, { foreignKey: "userUsersId" });
@@ -31,6 +32,7 @@ CashAccount.sync();
 CashAccountBalances.sync();
 Properties.sync();
 Currencies.sync();
+CurrencyCodes.sync();
 
 const connectoDB = async () => {
   try {
@@ -99,6 +101,17 @@ module.exports = createUser = async (sent_username, sent_password) => {
   // 'catch' appears to be resolved by sequelize
 };
 
+module.exports = getCurrencyDataFromDB = async (receivedCurrencyCode) => {
+  try {
+    const currenciesCodesQuery = await CurrencyCodes.findAll({
+      order: [["currency_name", "ASC"]],
+    });
+    return currenciesCodesQuery;
+  } catch (error) {
+    return error;
+  }
+};
+
 module.exports = getFXRateFromDB = async (from, to) => {
   try {
     const currenciesQuery = await Currencies.findOne({
@@ -162,6 +175,7 @@ module.exports = getCashAccountDataFromDB = async (reslocalsuser) => {
         users_id: reslocalsuser,
       },
     });
+
     // returns an array of accounts owned by the current user
     return usersCashAccounts.cash_accounts;
   } catch (err) {
