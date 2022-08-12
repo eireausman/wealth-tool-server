@@ -16,7 +16,6 @@ module.exports = (sequelize) => {
       },
       property_nickname: {
         type: Sequelize.STRING,
-        unique: true,
         allowNull: false,
         validate: {
           len: {
@@ -56,6 +55,16 @@ module.exports = (sequelize) => {
         },
       },
       property_valuation_currency: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        validate: {
+          len: {
+            args: [3, 3],
+            msg: "Currency value must be 3 characters long.",
+          },
+        },
+      },
+      property_valuation_curr_symbol: {
         type: Sequelize.STRING,
         allowNull: false,
         validate: {

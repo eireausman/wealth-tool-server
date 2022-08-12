@@ -16,7 +16,6 @@ module.exports = (sequelize) => {
       },
       account_nickname: {
         type: Sequelize.STRING,
-        unique: true,
         allowNull: false,
         validate: {
           len: {
