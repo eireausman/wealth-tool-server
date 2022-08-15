@@ -17,6 +17,16 @@ exports.updateAccountBalance = function (req, res, next) {
   });
 };
 
+exports.updatePropValue = function (req, res, next) {
+  const updateBalanceRequest = updatePropValueToDB(
+    req.body.property_id,
+    req.body.property_valuation,
+    req.body.property_loan_value
+  ).then((data) => {
+    res.send(data);
+  });
+};
+
 exports.getPropertiesData = function (req, res, next) {
   const propertyData = getPropertyDataFromDB(res.locals.currentUser.id).then(
     (data) => {
