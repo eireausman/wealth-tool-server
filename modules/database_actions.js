@@ -19,9 +19,12 @@ const Properties = require("../models/Properties")(sequelize);
 const Currencies = require("../models/currencies_fx")(sequelize);
 const CurrencyCodes = require("../models/currencies_codes")(sequelize);
 const PropertiesHistVals = require("../models/PropertiesHistVals")(sequelize);
+const Investments = require("../models/investments")(sequelize);
 
 User.hasMany(CashAccount, { foreignKey: "userUsersId" });
+User.hasMany(Investments, { foreignKey: "userUsersId" });
 CashAccount.belongsTo(User, { foreignKey: "userUsersId" });
+Investments.belongsTo(User, { foreignKey: "userUsersId" });
 User.hasMany(Properties, { foreignKey: "userUsersId" });
 CashAccount.hasMany(CashAccountBalances, { foreignKey: "account_id" });
 Properties.hasMany(PropertiesHistVals, { foreignKey: "property_id" });
@@ -37,6 +40,7 @@ Properties.sync();
 Currencies.sync();
 CurrencyCodes.sync();
 PropertiesHistVals.sync();
+Investments.sync();
 
 const connectoDB = async () => {
   try {
@@ -184,6 +188,24 @@ module.exports = getPropertyDataFromDB = async (reslocalsuser) => {
     });
     // returns an array of properties owned by the current user
     return usersPropertyData.properties;
+  } catch (err) {
+    return err;
+  }
+};
+
+module.exports = getInvestmentDataFromDB = async (reslocalsuser) => {
+  try {
+    const usersInvestmentData = await User.findOne({
+      attributes: ["users_id"],
+      include: Investments,
+      where: {
+        users_id: reslocalsuser,
+      },
+    });
+
+    // returns an array of investments owned by the current user
+
+    return await usersInvestmentData.investments;
   } catch (err) {
     return err;
   }

@@ -27,6 +27,14 @@ exports.updatePropValue = function (req, res, next) {
   });
 };
 
+exports.getInvestmentsData = function (req, res, next) {
+  const investmentData = getInvestmentDataFromDB(
+    res.locals.currentUser.id
+  ).then((data) => {
+    res.send(data);
+  });
+};
+
 exports.getPropertiesData = function (req, res, next) {
   const propertyData = getPropertyDataFromDB(res.locals.currentUser.id).then(
     (data) => {

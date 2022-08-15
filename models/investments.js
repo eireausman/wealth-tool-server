@@ -1,10 +1,10 @@
 const { Sequelize, Op, Model, DataTypes } = require("sequelize");
 
 module.exports = (sequelize) => {
-  const CashAccount = sequelize.define(
-    "cash_accounts",
+  const Investments = sequelize.define(
+    "investments",
     {
-      account_id: {
+      holding_id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
         unique: true,
@@ -14,17 +14,8 @@ module.exports = (sequelize) => {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
-      account_nickname: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        validate: {
-          len: {
-            args: [3, 35],
-            msg: "Nickname must be between 3 and 20 characters in length.",
-          },
-        },
-      },
-      account_owner_name: {
+
+      holding_owner_name: {
         type: Sequelize.STRING,
         allowNull: false,
         validate: {
@@ -34,17 +25,27 @@ module.exports = (sequelize) => {
           },
         },
       },
-      account_balance: {
-        type: Sequelize.INTEGER,
+      holding_institution: {
+        type: Sequelize.STRING,
         allowNull: false,
         validate: {
-          isInt: {
-            args: true,
-            msg: "Balance must be a number (integer).",
+          len: {
+            args: [3, 35],
+            msg: "Instituation must be between 3 and 20 characters in length.",
           },
         },
       },
-      account_currency_code: {
+      holding_market_identifier: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        validate: {
+          len: {
+            args: [3, 35],
+            msg: "ID must be between 3 and 20 characters in length.",
+          },
+        },
+      },
+      holding_currency_code: {
         type: Sequelize.STRING,
         allowNull: false,
         validate: {
@@ -54,7 +55,7 @@ module.exports = (sequelize) => {
           },
         },
       },
-      account_currency_symbol: {
+      holding_currency_symbol: {
         type: Sequelize.STRING,
         allowNull: false,
         validate: {
@@ -64,11 +65,23 @@ module.exports = (sequelize) => {
           },
         },
       },
+      holding_quantity_held: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
+      holding_current_price: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
+      holding_cost_total_value: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
     },
     {
       timestamps: false,
     }
   );
 
-  return CashAccount;
+  return Investments;
 };

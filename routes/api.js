@@ -24,6 +24,8 @@ router.post(
   dbQueryController.updateAccountBalance
 );
 
+router.get("/getinvestmentdata", dbQueryController.getInvestmentsData);
+
 router.post("/updatepropertyvalue", dbQueryController.updatePropValue);
 
 module.exports = router;
