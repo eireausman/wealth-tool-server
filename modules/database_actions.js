@@ -197,7 +197,13 @@ module.exports = getInvestmentDataFromDB = async (reslocalsuser) => {
   try {
     const usersInvestmentData = await User.findOne({
       attributes: ["users_id"],
-      include: Investments,
+      order: [
+        [Investments, "holding_owner_name", "ASC"],
+        [Investments, "holding_stock_name", "ASC"],
+      ],
+      include: {
+        model: Investments,
+      },
       where: {
         users_id: reslocalsuser,
       },

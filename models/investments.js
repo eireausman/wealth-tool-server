@@ -14,7 +14,6 @@ module.exports = (sequelize) => {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
-
       holding_owner_name: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -22,6 +21,16 @@ module.exports = (sequelize) => {
           len: {
             args: [3, 20],
             msg: "Owner name must be between 3 and 20 characters in length.",
+          },
+        },
+      },
+      holding_stock_name: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        validate: {
+          len: {
+            args: [3, 40],
+            msg: "Stock name must be between 3 and 40 characters in length.",
           },
         },
       },
