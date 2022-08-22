@@ -20,14 +20,20 @@ const Currencies = require("../models/currencies_fx")(sequelize);
 const CurrencyCodes = require("../models/currencies_codes")(sequelize);
 const PropertiesHistVals = require("../models/PropertiesHistVals")(sequelize);
 const Investments = require("../models/investments")(sequelize);
+const InvestmentPriceHistory = require("../models/investment_price_history")(
+  sequelize
+);
 
 User.hasMany(CashAccount, { foreignKey: "userUsersId" });
 User.hasMany(Investments, { foreignKey: "userUsersId" });
 CashAccount.belongsTo(User, { foreignKey: "userUsersId" });
 Investments.belongsTo(User, { foreignKey: "userUsersId" });
+InvestmentPriceHistory.belongsTo(Investments, { foreignKey: "holding_id" });
 User.hasMany(Properties, { foreignKey: "userUsersId" });
+
 CashAccount.hasMany(CashAccountBalances, { foreignKey: "account_id" });
 Properties.hasMany(PropertiesHistVals, { foreignKey: "property_id" });
+Investments.hasMany(InvestmentPriceHistory, { foreignKey: "holding_id" });
 
 CashAccountBalances.belongsTo(CashAccount, { foreignKey: "account_id" });
 PropertiesHistVals.belongsTo(Properties, { foreignKey: "property_id" });
@@ -41,6 +47,7 @@ Currencies.sync();
 CurrencyCodes.sync();
 PropertiesHistVals.sync();
 Investments.sync();
+InvestmentPriceHistory.sync();
 
 const connectoDB = async () => {
   try {
@@ -51,6 +58,76 @@ const connectoDB = async () => {
   }
 };
 connectoDB();
+
+module.exports = addNewInvestmentToDB = async (
+  userID,
+  stockName,
+  identifier,
+  quantity,
+  cost,
+  currentPrice,
+  ownerName,
+  institution,
+  currencySymbol,
+  currencyCode
+) => {
+  try {
+    const newInvestmentEntry = await Investments.create({
+      userUsersId: userID,
+      holding_owner_name: ownerName,
+      holding_stock_name: stockName,
+      holding_institution: institution,
+      holding_market_identifier: identifier,
+      holding_currency_code: currencyCode,
+      holding_currency_symbol: currencySymbol,
+      holding_quantity_held: quantity,
+      holding_current_price: currentPrice,
+      holding_cost_total_value: cost,
+    });
+    const saveResult = await newInvestmentEntry.save();
+
+    const holdingID = saveResult.dataValues.holding_id;
+    const today = new Date();
+    const newInvestmentPriceHistoryEntry = await InvestmentPriceHistory.create({
+      holding_id: holdingID,
+      holding_current_price: currentPrice,
+      price_asatdate: today,
+    });
+    await newInvestmentPriceHistoryEntry.save();
+  } catch (err) {
+    console.log(err);
+    return err;
+  }
+};
+
+module.exports = addNewPropertyToDB = async (userID, requestBody) => {
+  console.log(requestBody);
+  try {
+    const newPropEntry = await Properties.create({
+      userUsersId: userID,
+      property_nickname: requestBody.property_nickname,
+      property_owner_name: requestBody.property_owner_name,
+      property_valuation: requestBody.property_valuation,
+      property_loan_value: requestBody.property_loan_value,
+      property_valuation_currency: requestBody.currencyCode,
+      property_valuation_curr_symbol: requestBody.currencySymbol,
+    });
+    const saveResult = await newPropEntry.save();
+
+    const propID = saveResult.dataValues.property_id;
+    const today = new Date();
+    const newPropValHistoryEntry = await PropertiesHistVals.create({
+      property_id: propID,
+      property_valuation: requestBody.property_valuation,
+      property_loan_value: requestBody.property_loan_value,
+      property_value_asatdate: today,
+    });
+    await newPropValHistoryEntry.save();
+  } catch (err) {
+    console.log(err);
+    return err;
+  }
+};
 
 module.exports = findAllUsers = async () => {
   const users = await User.findAll();
@@ -141,8 +218,6 @@ module.exports = updateAccountBalanceToDB = async (accountID, balance) => {
     const entryExistsCheck = await CashAccountBalances.count({
       where: { account_id: accountID, account_balance_asatdate: today },
     });
-
-    console.log(entryExistsCheck);
 
     if (entryExistsCheck === 0) {
       const newCashAccountBalances = await CashAccountBalances.create({

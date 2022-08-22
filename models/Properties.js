@@ -69,8 +69,8 @@ module.exports = (sequelize) => {
         allowNull: false,
         validate: {
           len: {
-            args: [3, 3],
-            msg: "Currency value must be 3 characters long.",
+            args: [1, 1],
+            msg: "Currency value must be 1 character long.",
           },
         },
       },

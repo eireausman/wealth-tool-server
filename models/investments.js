@@ -81,6 +81,12 @@ module.exports = (sequelize) => {
       holding_current_price: {
         type: Sequelize.INTEGER,
         allowNull: false,
+        validate: {
+          isInt: {
+            args: true,
+            msg: "Price must be a number (integer I.e. 152p or 152c).",
+          },
+        },
       },
       holding_cost_total_value: {
         type: Sequelize.INTEGER,

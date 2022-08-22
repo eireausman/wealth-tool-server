@@ -14,10 +14,14 @@ router.get("/getpropertiesdata", dbQueryController.getPropertiesData);
 
 router.get("/getcashaccountdata", dbQueryController.getCashAccountData);
 
-// need to amend to get reqeuest
+// need to amend to get request
 router.post("/getfxrates", dbQueryController.getFXRate);
 
 router.get("/getcurrencycodes", dbQueryController.getCurrencyData);
+
+router.post("/addnewinvestment", dbQueryController.addNewInvestment);
+
+router.post("/addnewproperty", dbQueryController.addNewProperty);
 
 router.post(
   "/updatecashaccountbalance",

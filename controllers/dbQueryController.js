@@ -1,5 +1,33 @@
 const getCashAccountDataFromDB = require("../modules/database_actions");
 
+exports.addNewInvestment = function (req, res, next) {
+  console.log("request", req.body);
+  const cashAccountData = addNewInvestmentToDB(
+    res.locals.currentUser.id,
+    req.body.stockName,
+    req.body.identifier,
+    req.body.quantity,
+    req.body.cost,
+    req.body.currentPrice,
+    req.body.ownerName,
+    req.body.institution,
+    req.body.currencySymbol,
+    req.body.currencyCode
+  ).then((data) => {
+    res.send(data);
+  });
+};
+
+exports.addNewProperty = function (req, res, next) {
+  console.log("request", req.body);
+  const newPropertyData = addNewPropertyToDB(
+    res.locals.currentUser.id,
+    req.body
+  ).then((data) => {
+    res.send(data);
+  });
+};
+
 exports.getCashAccountData = function (req, res, next) {
   const cashAccountData = getCashAccountDataFromDB(
     res.locals.currentUser.id
