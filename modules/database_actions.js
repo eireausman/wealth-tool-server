@@ -1,4 +1,5 @@
-const { Sequelize } = require("sequelize");
+const { DateTime } = require("luxon");
+const { Op, Sequelize } = require("sequelize");
 
 const sequelize = new Sequelize(
   process.env.DATABASE_NAME,
@@ -208,6 +209,44 @@ module.exports = getFXRateFromDB = async (from, to) => {
     });
     return currenciesQuery;
   } catch (error) {
+    return error;
+  }
+};
+
+module.exports = insertFXRateIntoDB = async (from, to, rate) => {
+  console.log(from);
+  console.log(to);
+  console.log(rate);
+  // try {
+  //   const insertQuery = await Currencies.findOrCreate({
+  //     where: { currency_code_from: from, currency_code_to: to },
+  //   });
+  //   return await insertQuery;
+  // } catch (error) {
+  //   console.log(error);
+  //   return error;
+  // }
+};
+
+module.exports = wereRatesUpdatedRecently = async () => {
+  const fiveDaysAgoDate = DateTime.now()
+    .minus({ days: 5 })
+    .toISODate(DateTime.DATE_MED);
+
+  try {
+    const RatesUpdatedRecently = await Currencies.count({
+      where: {
+        currency_fxrate_dateupdated: {
+          [Op.gt]: fiveDaysAgoDate,
+        },
+      },
+    });
+
+    if (RatesUpdatedRecently > 0) return true;
+    // 0 = rates were recently updated.
+    return false;
+  } catch (error) {
+    console.log(error);
     return error;
   }
 };

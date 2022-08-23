@@ -1,4 +1,4 @@
-const getCashAccountDataFromDB = require("../modules/database_actions");
+require("../modules/database_actions");
 
 exports.addNewInvestment = function (req, res, next) {
   console.log("request", req.body);

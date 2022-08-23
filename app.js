@@ -15,8 +15,23 @@ const jwt = require("jsonwebtoken");
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var apiRouter = require("./routes/api");
+var fxRateUpdater = require("./modules/getFXRates");
+
+var cron = require("node-cron");
 
 var app = express();
+
+cron.schedule("* * * * * 1,3,6", () => {
+  // run the update FX Rates job every few days.  1 = Monday.
+
+  fxRateUpdater();
+  console.log("FXRates update functions have been run");
+});
+
+app.use(function (req, res, next) {
+  fxRateUpdater();
+  next();
+});
 
 passport.use(
   new LocalStrategy((username, password, done) => {
