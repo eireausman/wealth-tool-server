@@ -1,5 +1,6 @@
 const { DateTime } = require("luxon");
 const { Op, Sequelize } = require("sequelize");
+const cashAccounts = require("../models/cashAccounts");
 
 const sequelize = new Sequelize(
   process.env.DATABASE_NAME,
@@ -60,6 +61,33 @@ const connectoDB = async () => {
 };
 connectoDB();
 
+module.exports = addNewCashAccountToDB = async (userID, requestBody) => {
+  try {
+    const newCashAccountEntry = await CashAccount.create({
+      userUsersId: userID,
+      account_nickname: requestBody.account_nickname,
+      account_number_last4_digits: requestBody.account_number_last4_digits,
+      account_owner_name: requestBody.account_owner_name,
+      account_balance: requestBody.account_balance,
+      account_currency_code: requestBody.account_currency_code,
+      account_currency_symbol: requestBody.account_currency_symbol,
+    });
+    const saveResult = await newCashAccountEntry.save();
+
+    const accountID = await saveResult.dataValues.account_id;
+    const today = new Date();
+    const newCashAccountHistoryEntry = await CashAccountBalances.create({
+      account_id: accountID,
+      account_balance: requestBody.account_balance,
+      account_balance_asatdate: today,
+    });
+    await newCashAccountHistoryEntry.save();
+  } catch (err) {
+    console.log(err);
+    return err;
+  }
+};
+
 module.exports = addNewInvestmentToDB = async (
   userID,
   stockName,
@@ -114,7 +142,7 @@ module.exports = addNewPropertyToDB = async (userID, requestBody) => {
     });
     const saveResult = await newPropEntry.save();
 
-    const propID = saveResult.dataValues.property_id;
+    const propID = await saveResult.dataValues.property_id;
     const today = new Date();
     const newPropValHistoryEntry = await PropertiesHistVals.create({
       property_id: propID,

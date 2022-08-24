@@ -24,6 +24,20 @@ module.exports = (sequelize) => {
           },
         },
       },
+      account_number_last4_digits: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        validate: {
+          isInt: {
+            args: true,
+            msg: "Last 4 account digits must be a number (integer).",
+          },
+          len: {
+            args: [4, 4],
+            msg: "Last 4 account digits must be 4 characters long",
+          },
+        },
+      },
       account_owner_name: {
         type: Sequelize.STRING,
         allowNull: false,

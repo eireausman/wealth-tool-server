@@ -18,8 +18,16 @@ exports.addNewInvestment = function (req, res, next) {
   });
 };
 
+exports.addNewCashAccount = function (req, res, next) {
+  const newPropertyData = addNewCashAccountToDB(
+    res.locals.currentUser.id,
+    req.body
+  ).then((data) => {
+    res.send(data);
+  });
+};
+
 exports.addNewProperty = function (req, res, next) {
-  console.log("request", req.body);
   const newPropertyData = addNewPropertyToDB(
     res.locals.currentUser.id,
     req.body

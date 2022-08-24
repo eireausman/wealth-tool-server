@@ -23,6 +23,8 @@ router.post("/addnewinvestment", dbQueryController.addNewInvestment);
 
 router.post("/addnewproperty", dbQueryController.addNewProperty);
 
+router.post("/addnewcashaccount", dbQueryController.addNewCashAccount);
+
 router.post(
   "/updatecashaccountbalance",
   dbQueryController.updateAccountBalance
