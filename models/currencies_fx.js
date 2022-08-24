@@ -20,16 +20,7 @@ module.exports = (sequelize) => {
           },
         },
       },
-      currency_code_from_symbol: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        validate: {
-          len: {
-            args: [1],
-            msg: "Symbol must be 3 characters in length.",
-          },
-        },
-      },
+
       currency_code_to: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -40,16 +31,7 @@ module.exports = (sequelize) => {
           },
         },
       },
-      currency_code_to_symbol: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        validate: {
-          len: {
-            args: [1],
-            msg: "Symbol must be 3 characters in length.",
-          },
-        },
-      },
+
       currency_fxrate: {
         type: Sequelize.FLOAT,
         allowNull: false,

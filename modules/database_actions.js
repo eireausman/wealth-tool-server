@@ -102,7 +102,6 @@ module.exports = addNewInvestmentToDB = async (
 };
 
 module.exports = addNewPropertyToDB = async (userID, requestBody) => {
-  console.log(requestBody);
   try {
     const newPropEntry = await Properties.create({
       userUsersId: userID,
@@ -213,31 +212,56 @@ module.exports = getFXRateFromDB = async (from, to) => {
   }
 };
 
-module.exports = insertFXRateIntoDB = async (from, to, rate) => {
-  console.log(from);
-  console.log(to);
-  console.log(rate);
-  // try {
-  //   const insertQuery = await Currencies.findOrCreate({
-  //     where: { currency_code_from: from, currency_code_to: to },
-  //   });
-  //   return await insertQuery;
-  // } catch (error) {
-  //   console.log(error);
-  //   return error;
-  // }
+module.exports = insertFXRateIntoDB = async (
+  fromCurrency,
+  toCurrency,
+  fxRate
+) => {
+  const today = new Date();
+  try {
+    const checkifExists = await Currencies.count({
+      where: { currency_code_from: fromCurrency, currency_code_to: toCurrency },
+    });
+
+    if ((await checkifExists) === 0) {
+      const newCurrency = await Currencies.create({
+        currency_code_from: fromCurrency,
+        currency_code_to: toCurrency,
+        currency_fxrate: fxRate,
+        currency_fxrate_dateupdated: today,
+      });
+
+      await newCurrency.save();
+    } else {
+      await Currencies.update(
+        {
+          currency_fxrate: fxRate,
+          currency_fxrate_dateupdated: today,
+        },
+        {
+          where: {
+            currency_code_from: fromCurrency,
+            currency_code_to: toCurrency,
+          },
+        }
+      );
+    }
+  } catch (err) {
+    console.log(err);
+    return err;
+  }
 };
 
 module.exports = wereRatesUpdatedRecently = async () => {
-  const fiveDaysAgoDate = DateTime.now()
-    .minus({ days: 5 })
+  const nDaysAgoDate = DateTime.now()
+    .minus({ days: 1 })
     .toISODate(DateTime.DATE_MED);
 
   try {
     const RatesUpdatedRecently = await Currencies.count({
       where: {
         currency_fxrate_dateupdated: {
-          [Op.gt]: fiveDaysAgoDate,
+          [Op.gt]: nDaysAgoDate,
         },
       },
     });
@@ -340,7 +364,7 @@ module.exports = updatePropValueToDB = async (propID, propVal, propLoanVal) => {
         property_id: propID,
       },
     });
-    console.log(entryExistsCheck);
+
     if (entryExistsCheck === 0) {
       const newPropValues = await PropertiesHistVals.create({
         property_id: propID,

@@ -2,8 +2,6 @@ require("../modules/database_actions");
 const axios = require("axios");
 
 module.exports = updateFXRates = async () => {
-  console.log("got here 3");
-
   const areFXRatesUpToDate = await wereRatesUpdatedRecently();
   if (areFXRatesUpToDate === false) {
     const currenciesFromDB = await getCurrencyDataFromDB();
@@ -18,28 +16,25 @@ module.exports = updateFXRates = async () => {
 };
 
 const FXDataFromAPI = async (FXDataURLsList, currenciesFromDB) => {
-  for (i = 0; i < FXDataURLsList.length; i += 1) {
-    console.log(FXDataURLsList[i]);
-    const serverResponse = await axios.get(FXDataURLsList[i]);
+  let tempList = [];
 
-    // for (i = 0; i < currenciesFromDB.length; i += 1) {
-    //   const fromCurrencyCode = serverResponse.data.base_code;
-    //   const toCurrencyCode = currenciesFromDB[i].currency_code;
-    //   const fxRate =
-    //     serverResponse.data.conversion_rates[toCurrencyCode];
+  for (url of FXDataURLsList) {
+    const serverResponse = await axios.get(url);
 
-    //   if (fromCurrencyCode !== toCurrencyCode) {
-    //     console.log(
-    //       "HERE I AM HERE I AM HERE I AM HERE I AM HERE I AM HERE I AM HERE I AM HERE I AM HERE I AM HERE I AM HERE I AM HERE I AM ",
-    //       serverResponse.data.base_code,
-    //       serverResponse.data.conversion_rates,
-    //       serverResponse.data.conversion_rates[
-    //         currenciesFromDB[i].currency_code
-    //       ]
-    //     );
+    for (currency of currenciesFromDB) {
+      const fromCurrencyCode = serverResponse.data.base_code;
+      const toCurrencyCode = currency.currency_code;
+      const fxRate = serverResponse.data.conversion_rates[toCurrencyCode];
 
-    //     insertFXRateIntoDB(fromCurrencyCode, toCurrencyCode, fxRate);
-    //   }
-    // }
+      const tempListEntry = {
+        url,
+        toCurrencyCode,
+        toCurrencyCode,
+        toCurrencyCode,
+      };
+      tempList.push(tempListEntry);
+
+      await insertFXRateIntoDB(fromCurrencyCode, toCurrencyCode, fxRate);
+    }
   }
 };
