@@ -25,6 +25,10 @@ router.post("/addnewproperty", dbQueryController.addNewProperty);
 
 router.post("/addnewcashaccount", dbQueryController.addNewCashAccount);
 
+router.get("/gettotalposassets", dbQueryController.getTotalPosAssetValue);
+
+router.get("/getdebttotalvalue", dbQueryController.getDebtTotalValue);
+
 router.post(
   "/updatecashaccountbalance",
   dbQueryController.updateAccountBalance

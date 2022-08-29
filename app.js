@@ -26,13 +26,7 @@ cron.schedule("59 * * * * *", () => {
   // It checks if the API should be called to protect overuse / charging of API.  Cost is a DB call each minute.
   // follow the function to see the limiting condition.
   fxRateUpdater();
-  console.log("FXRates update functions have been run");
 });
-
-// app.use(function (req, res, next) {
-//   fxRateUpdater();
-//   next();
-// });
 
 passport.use(
   new LocalStrategy((username, password, done) => {

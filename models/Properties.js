@@ -74,6 +74,11 @@ module.exports = (sequelize) => {
           },
         },
       },
+      soft_deleted: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
     },
     {
       timestamps: false,

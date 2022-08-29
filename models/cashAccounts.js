@@ -33,8 +33,8 @@ module.exports = (sequelize) => {
             msg: "Last 4 account digits must be a number (integer).",
           },
           len: {
-            args: [4, 4],
-            msg: "Last 4 account digits must be 4 characters long",
+            args: [3, 35],
+            msg: "Account number account digits must at least 3 characters long",
           },
         },
       },
@@ -77,6 +77,11 @@ module.exports = (sequelize) => {
             msg: "Currency symbol value must be 1 character long.",
           },
         },
+      },
+      soft_deleted: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
       },
     },
     {

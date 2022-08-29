@@ -1,4 +1,5 @@
 const { Sequelize, Op, Model, DataTypes } = require("sequelize");
+const exchangeRate = "2";
 
 module.exports = (sequelize) => {
   const Investments = sequelize.define(
@@ -40,7 +41,7 @@ module.exports = (sequelize) => {
         validate: {
           len: {
             args: [3, 35],
-            msg: "Instituation must be between 3 and 20 characters in length.",
+            msg: "Instituation must be between 3 and 35 characters in length.",
           },
         },
       },
@@ -92,7 +93,24 @@ module.exports = (sequelize) => {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
+      soft_deleted: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+      virtual_BaseCurrencyValue: {
+        type: DataTypes.VIRTUAL,
+        get() {
+          return (
+            `${this.holding_quantity_held}` * `${this.holding_current_price}`
+          );
+        },
+        set(value) {
+          throw new Error("Do not try to set the virtual value!");
+        },
+      },
     },
+
     {
       timestamps: false,
     }

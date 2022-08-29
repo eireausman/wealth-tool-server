@@ -13,6 +13,7 @@ module.exports = updateFXRates = async () => {
 
     FXDataFromAPI(FXDataURLsList, currenciesFromDB);
   }
+  console.log("FXRates update functions have been run");
 };
 
 const FXDataFromAPI = async (FXDataURLsList, currenciesFromDB) => {

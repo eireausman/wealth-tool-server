@@ -1,5 +1,5 @@
 const { DateTime } = require("luxon");
-const { Op, Sequelize } = require("sequelize");
+const { literal, Op, Sequelize } = require("sequelize");
 const cashAccounts = require("../models/cashAccounts");
 
 const sequelize = new Sequelize(
@@ -9,8 +9,10 @@ const sequelize = new Sequelize(
   {
     host: `${process.env.RDS_HOSTNAME}`,
     dialect: "mysql",
+    logging: false,
   }
 );
+// logging: console.log,
 
 const User = require("../models/user")(sequelize);
 const CashAccount = require("../models/cashAccounts")(sequelize);
@@ -232,10 +234,13 @@ module.exports = getFXRateFromDB = async (from, to) => {
         currency_code_from: from,
         currency_code_to: to,
       },
+      logging: console.log,
       order: [["currency_fxrate_dateupdated", "DESC"]],
     });
+
     return currenciesQuery;
   } catch (error) {
+    console.log(error);
     return error;
   }
 };
@@ -347,9 +352,14 @@ module.exports = getPropertyDataFromDB = async (reslocalsuser) => {
   try {
     const usersPropertyData = await User.findOne({
       attributes: ["users_id"],
-      include: Properties,
       where: {
         users_id: reslocalsuser,
+      },
+      include: {
+        model: Properties,
+        where: {
+          soft_deleted: 0,
+        },
       },
     });
     // returns an array of properties owned by the current user
@@ -367,11 +377,14 @@ module.exports = getInvestmentDataFromDB = async (reslocalsuser) => {
         [Investments, "holding_owner_name", "ASC"],
         [Investments, "holding_stock_name", "ASC"],
       ],
-      include: {
-        model: Investments,
-      },
       where: {
         users_id: reslocalsuser,
+      },
+      include: {
+        model: Investments,
+        where: {
+          soft_deleted: 0,
+        },
       },
     });
 
@@ -379,6 +392,161 @@ module.exports = getInvestmentDataFromDB = async (reslocalsuser) => {
 
     return await usersInvestmentData.investments;
   } catch (err) {
+    return err;
+  }
+};
+
+module.exports = getPosInvestmentTotalsByCurrency = async (reslocalsuser) => {
+  try {
+    const usersInvestmentData = await User.findOne({
+      group: ["holding_currency_code"],
+      where: {
+        users_id: reslocalsuser,
+      },
+      include: {
+        model: Investments,
+
+        where: {
+          soft_deleted: 0,
+          holding_current_price: {
+            [Op.gt]: 0,
+          },
+          holding_quantity_held: {
+            [Op.gt]: 0,
+          },
+        },
+
+        attributes: [
+          "holding_currency_code",
+
+          [
+            sequelize.literal(
+              "SUM(COALESCE(holding_current_price, 0) * COALESCE(holding_quantity_held, 0))"
+            ),
+            "total",
+          ],
+        ],
+      },
+    });
+    return await usersInvestmentData.investments;
+  } catch (err) {
+    console.log(err);
+    return err;
+  }
+};
+
+module.exports = getDebtCashAccountTotalsByCurrency = async (reslocalsuser) => {
+  try {
+    const usersCashAccountData = await User.findOne({
+      group: ["account_currency_code"],
+      where: {
+        users_id: reslocalsuser,
+      },
+      include: {
+        model: CashAccount,
+        where: {
+          soft_deleted: 0,
+          account_balance: {
+            [Op.lt]: 0,
+          },
+        },
+        attributes: [
+          "account_currency_code",
+          [sequelize.fn("sum", sequelize.col("account_balance")), "total"],
+        ],
+      },
+    });
+    return await usersCashAccountData.cash_accounts;
+  } catch (err) {
+    console.log(err);
+    return err;
+  }
+};
+
+module.exports = getDebtPropertyTotalsByCurrency = async (reslocalsuser) => {
+  try {
+    const usersPropertyValueData = await User.findOne({
+      group: ["property_valuation_currency"],
+      where: {
+        users_id: reslocalsuser,
+      },
+      include: {
+        model: Properties,
+
+        where: {
+          soft_deleted: 0,
+        },
+
+        attributes: [
+          "property_valuation_currency",
+          [
+            sequelize.fn("sum", sequelize.col("property_loan_value")),
+            "totalPositiveNumber",
+          ],
+          [
+            sequelize.literal("SUM(COALESCE(property_loan_value, 0) * -1)"),
+            "total",
+          ],
+        ],
+      },
+    });
+    return await usersPropertyValueData.properties;
+  } catch (err) {
+    console.log(err);
+    return err;
+  }
+};
+
+module.exports = getPosCashAccountTotalsByCurrency = async (reslocalsuser) => {
+  try {
+    const usersCashAccountData = await User.findOne({
+      group: ["account_currency_code"],
+      where: {
+        users_id: reslocalsuser,
+      },
+      include: {
+        model: CashAccount,
+        where: {
+          soft_deleted: 0,
+          account_balance: {
+            [Op.gt]: 0,
+          },
+        },
+        attributes: [
+          "account_currency_code",
+          [sequelize.fn("sum", sequelize.col("account_balance")), "total"],
+        ],
+      },
+    });
+    return await usersCashAccountData.cash_accounts;
+  } catch (err) {
+    console.log(err);
+    return err;
+  }
+};
+module.exports = getPosPropertyTotalsByCurrency = async (reslocalsuser) => {
+  try {
+    const usersPropertyValueData = await User.findOne({
+      group: ["property_valuation_currency"],
+      where: {
+        users_id: reslocalsuser,
+      },
+      include: {
+        model: Properties,
+
+        where: {
+          soft_deleted: 0,
+        },
+
+        attributes: [
+          "property_valuation_currency",
+          [sequelize.fn("sum", sequelize.col("property_valuation")), "total"],
+        ],
+      },
+    });
+    return await usersPropertyValueData.properties;
+  } catch (err) {
+    console.log(err);
     return err;
   }
 };
@@ -434,9 +602,14 @@ module.exports = getCashAccountDataFromDB = async (reslocalsuser) => {
   try {
     const usersCashAccounts = await User.findOne({
       attributes: ["users_id"],
-      include: CashAccount,
       where: {
         users_id: reslocalsuser,
+      },
+      include: {
+        model: CashAccount,
+        where: {
+          soft_deleted: 0,
+        },
       },
     });
 
