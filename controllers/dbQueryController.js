@@ -53,7 +53,7 @@ exports.getDebtTotalValue = async function (req, res, next) {
   const selectedCurrency = req.query.selectedcurrency;
   for (item in totalsByCurr) {
     const rateQuery = await getFXRateFromDB(item, selectedCurrency);
-    const rate = rateQuery.dataValues.currency_fxrate;
+    const rate = rateQuery.currency_fxrate;
     convertedTotal += totalsByCurr[item] * rate;
   }
   res.send({ convertedTotal });
@@ -118,7 +118,7 @@ exports.getTotalPosAssetValue = async function (req, res, next) {
   const selectedCurrency = req.query.selectedcurrency;
   for (item in totalsByCurr) {
     const rateQuery = await getFXRateFromDB(item, selectedCurrency);
-    const rate = rateQuery.dataValues.currency_fxrate;
+    const rate = rateQuery.currency_fxrate;
     convertedTotal += totalsByCurr[item] * rate;
   }
 
@@ -161,40 +161,55 @@ exports.updatePropValue = function (req, res, next) {
   });
 };
 
-exports.getInvestmentsData = function (req, res, next) {
-  const investmentData = getInvestmentDataFromDB(
-    res.locals.currentUser.id
-  ).then((data) => {
-    res.send(data);
-  });
-};
-
 exports.getPropertiesData = async function (req, res, next) {
   const selectedCurrency = req.query.selectedcurrency;
+
   const propertyData = await getPropertyDataFromDB(res.locals.currentUser.id);
 
-  for (i = 0; i < propertyData.length; i += 1) {
-    const baseCurr = propertyData[i].dataValues.property_valuation_currency;
-    const rate = await getFXRateFromDB(baseCurr, selectedCurrency);
+  for (let i = 0; i < propertyData.length; i += 1) {
+    const prop_baseCurr = propertyData[i].property_valuation_currency;
+    const prop_rate = await getFXRateFromDB(prop_baseCurr, selectedCurrency);
 
-    const netValue =
-      parseInt(propertyData[i].dataValues.property_valuation) -
-      parseInt(propertyData[i].dataValues.property_loan_value);
-
-    const totalConvertedValue = parseInt(netValue) * rate.currency_fxrate;
-
-    propertyData[i].dataValues.propertyValuationInSelCurr =
-      parseInt(totalConvertedValue);
+    const prop_totalConvertedValue =
+      (parseInt(propertyData[i].property_valuation) -
+        parseInt(propertyData[i].property_loan_value)) *
+      prop_rate.currency_fxrate;
+    propertyData[i].propertyValuationInSelCurr = parseInt(
+      prop_totalConvertedValue
+    );
   }
+
   res.send(propertyData);
 };
 
-exports.getCurrencyData = function (req, res, next) {
-  const currencyCodeData = getCurrencyDataFromDB(req.body.currencyCode).then(
-    (data) => {
-      res.send(data);
-    }
+exports.getInvestmentsData = async function (req, res, next) {
+  const selectedCurrency = req.query.selectedcurrency;
+
+  const investmentData = await getInvestmentDataFromDB(
+    res.locals.currentUser.id
   );
+
+  for (let i = 0; i < investmentData.length; i += 1) {
+    const invest_baseCurr = investmentData[i].holding_currency_code;
+    const invest_rate = await getFXRateFromDB(
+      invest_baseCurr,
+      selectedCurrency
+    );
+
+    const invest_totalConvertedValue =
+      parseInt(investmentData[i].virtual_BaseCurrencyValue) *
+      invest_rate.currency_fxrate;
+    investmentData[i].investmentValuationInSelCurr = parseInt(
+      invest_totalConvertedValue
+    );
+  }
+  res.send(investmentData);
+};
+
+exports.getCurrencyData = function (req, res, next) {
+  const currencyCodeData = getCurrencyDataFromDB().then((data) => {
+    res.send(data);
+  });
 };
 
 exports.getFXRate = function (req, res, next) {

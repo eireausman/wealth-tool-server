@@ -216,7 +216,7 @@ module.exports = createUser = async (sent_username, sent_password) => {
   // 'catch' appears to be resolved by sequelize
 };
 
-module.exports = getCurrencyDataFromDB = async (receivedCurrencyCode) => {
+module.exports = getCurrencyDataFromDB = async () => {
   try {
     const currenciesCodesQuery = await CurrencyCodes.findAll({
       order: [["currency_name", "ASC"]],
@@ -234,11 +234,10 @@ module.exports = getFXRateFromDB = async (from, to) => {
         currency_code_from: from,
         currency_code_to: to,
       },
-      logging: console.log,
       order: [["currency_fxrate_dateupdated", "DESC"]],
     });
 
-    return currenciesQuery;
+    return await currenciesQuery.dataValues;
   } catch (error) {
     console.log(error);
     return error;
@@ -350,7 +349,7 @@ module.exports = updateAccountBalanceToDB = async (accountID, balance) => {
 
 module.exports = getPropertyDataFromDB = async (reslocalsuser) => {
   try {
-    const usersPropertyData = await User.findOne({
+    const usersPropertyDataQuery = await User.findOne({
       attributes: ["users_id"],
       where: {
         users_id: reslocalsuser,
@@ -363,7 +362,12 @@ module.exports = getPropertyDataFromDB = async (reslocalsuser) => {
       },
     });
     // returns an array of properties owned by the current user
-    return usersPropertyData.properties;
+    const usersPropertyData = usersPropertyDataQuery.properties.map(function (
+      record
+    ) {
+      return record.dataValues;
+    });
+    return usersPropertyData;
   } catch (err) {
     return err;
   }
@@ -371,7 +375,7 @@ module.exports = getPropertyDataFromDB = async (reslocalsuser) => {
 
 module.exports = getInvestmentDataFromDB = async (reslocalsuser) => {
   try {
-    const usersInvestmentData = await User.findOne({
+    const usersInvestmentQuery = await User.findOne({
       attributes: ["users_id"],
       order: [
         [Investments, "holding_owner_name", "ASC"],
@@ -389,8 +393,12 @@ module.exports = getInvestmentDataFromDB = async (reslocalsuser) => {
     });
 
     // returns an array of investments owned by the current user
-
-    return await usersInvestmentData.investments;
+    const usersInvestmentData = usersInvestmentQuery.investments.map(function (
+      record
+    ) {
+      return record.dataValues;
+    });
+    return await usersInvestmentData;
   } catch (err) {
     return err;
   }
