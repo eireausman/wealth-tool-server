@@ -554,6 +554,63 @@ module.exports = getPosPropertyTotalsByCurrency = async (reslocalsuser) => {
   }
 };
 
+module.exports = getNetCashAccountTotalsByCurrency = async (reslocalsuser) => {
+  try {
+    const usersCashAccountData = await User.findOne({
+      group: ["account_currency_code"],
+      where: {
+        users_id: reslocalsuser,
+      },
+      include: {
+        model: CashAccount,
+        where: {
+          soft_deleted: 0,
+        },
+        attributes: [
+          "account_currency_code",
+          [sequelize.fn("sum", sequelize.col("account_balance")), "total"],
+        ],
+      },
+    });
+    return await usersCashAccountData.cash_accounts;
+  } catch (err) {
+    console.log(err);
+    return err;
+  }
+};
+
+module.exports = getNetPropertyTotalsByCurrency = async (reslocalsuser) => {
+  try {
+    const usersPropertyValueData = await User.findOne({
+      group: ["property_valuation_currency"],
+      where: {
+        users_id: reslocalsuser,
+      },
+      include: {
+        model: Properties,
+
+        where: {
+          soft_deleted: 0,
+        },
+
+        attributes: [
+          "property_valuation_currency",
+          [
+            sequelize.literal(
+              "SUM(COALESCE(property_valuation, 0) - COALESCE(property_loan_value, 0))"
+            ),
+            "total",
+          ],
+        ],
+      },
+    });
+    return await usersPropertyValueData.properties;
+  } catch (err) {
+    console.log(err);
+    return err;
+  }
+};
+
 module.exports = updatePropValueToDB = async (propID, propVal, propLoanVal) => {
   const today = new Date();
   try {

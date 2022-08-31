@@ -49,27 +49,27 @@ sqlSessionStore.sync();
 passport.use(
   new LocalStrategy((username, password, done) => {
     findOneUser("users_username", username).then((userData) => {
-      console.log("user query completed");
+      console.log("LOGIN: user query completed");
       if (userData === false) {
-        console.log("usename rejected");
+        console.log("LOGIN: usename rejected");
         return done(null, false, { message: "Incorrect username" });
       }
       bcrypt.compare(password, userData.password, (err, res) => {
         if (res) {
           // passwords match! log user in
-          console.log("passwords matched");
+          console.log("LOGIN: passwords matched");
           const user = {
             id: userData.id,
           };
           return done(null, user);
         } else {
           // passwords do not match!
-          console.log("password DO NOT match");
+          console.log("LOGIN: password DO NOT match");
           return done(null, false, { message: "Incorrect password" });
         }
       });
     });
-    console.log("passport check complete - LOCAL STRATEGY");
+    console.log("LOGIN: passport check complete - LOCAL STRATEGY");
   })
 );
 
@@ -87,13 +87,6 @@ passport.deserializeUser(function (id, done) {
   });
 });
 
-// app.use(
-//   session({
-//     secret: process.env.SESSION_SECRET_STRING,
-//     resave: false,
-//     saveUninitialized: true,
-//   })
-// );
 app.use(passport.initialize());
 app.use(passport.session());
 

@@ -52,9 +52,10 @@ exports.getDebtTotalValue = async function (req, res, next) {
   let convertedTotal = 0;
   const selectedCurrency = req.query.selectedcurrency;
   for (item in totalsByCurr) {
+    const itemValue = totalsByCurr[item];
     const rateQuery = await getFXRateFromDB(item, selectedCurrency);
     const rate = rateQuery.currency_fxrate;
-    convertedTotal += totalsByCurr[item] * rate;
+    convertedTotal += itemValue * rate;
   }
   res.send({ convertedTotal });
 };
@@ -70,59 +71,86 @@ exports.getTotalPosAssetValue = async function (req, res, next) {
     res.locals.currentUser.id
   );
 
-  const currenciesArray = [];
-
-  investSummary.forEach((item) => {
-    currenciesArray.push(item.holding_currency_code);
-  });
-  CashAccSummary.forEach((item) => {
-    currenciesArray.push(item.account_currency_code);
-  });
-  propSummary.forEach((item) => {
-    currenciesArray.push(item.property_valuation_currency);
-  });
-  //gets unique currencies list from above sets:
-  const uniqueCurrenciesList = [
-    ...new Set(currenciesArray.map((item) => item)),
-  ];
-
-  let totalsByCurr = {};
-  uniqueCurrenciesList.forEach((currencyCode) => {
-    if (!totalsByCurr.hasOwnProperty(currencyCode)) {
-      totalsByCurr[currencyCode] = 0;
-    }
-    investSummary.forEach((item) => {
-      if (item.dataValues.holding_currency_code === currencyCode) {
-        totalsByCurr[currencyCode] =
-          parseInt(totalsByCurr[currencyCode]) +
-          parseInt(item.dataValues.total);
-      }
-    });
-    CashAccSummary.forEach((item) => {
-      if (item.dataValues.account_currency_code === currencyCode) {
-        totalsByCurr[currencyCode] =
-          parseInt(totalsByCurr[currencyCode]) +
-          parseInt(item.dataValues.total);
-      }
-    });
-    propSummary.forEach((item) => {
-      if (item.dataValues.property_valuation_currency === currencyCode) {
-        totalsByCurr[currencyCode] =
-          parseInt(totalsByCurr[currencyCode]) +
-          parseInt(item.dataValues.total);
-      }
-    });
-  });
+  // combine the above and get a summary by currency rather than by asset type by currency
+  const totalsByCurr = totalsCalc.calculateTotalsByCurr(
+    investSummary,
+    CashAccSummary,
+    propSummary
+  );
 
   let convertedTotal = 0;
   const selectedCurrency = req.query.selectedcurrency;
   for (item in totalsByCurr) {
+    const itemValue = totalsByCurr[item];
     const rateQuery = await getFXRateFromDB(item, selectedCurrency);
     const rate = rateQuery.currency_fxrate;
-    convertedTotal += totalsByCurr[item] * rate;
+    convertedTotal += itemValue * rate;
   }
 
   res.send({ convertedTotal });
+};
+
+exports.getCashAccountNetTotal = async function (req, res, next) {
+  const CashAccSummary = await getNetCashAccountTotalsByCurrency(
+    res.locals.currentUser.id
+  );
+
+  const selectedCurrency = req.query.selectedcurrency;
+  let CashAccSummaryConvertedTotal = 0;
+
+  for (item in CashAccSummary) {
+    const fromCurrency = CashAccSummary[item].dataValues.account_currency_code;
+    const totalVal = parseInt(CashAccSummary[item].dataValues.total);
+    const rateQuery = await getFXRateFromDB(fromCurrency, selectedCurrency);
+    const rate = rateQuery.currency_fxrate;
+
+    CashAccSummaryConvertedTotal += totalVal * rate;
+  }
+  const returnNumber = parseInt(CashAccSummaryConvertedTotal);
+
+  res.json(returnNumber);
+};
+
+exports.getPropertyNetTotal = async function (req, res, next) {
+  const propSummary = await getNetPropertyTotalsByCurrency(
+    res.locals.currentUser.id
+  );
+
+  const selectedCurrency = req.query.selectedcurrency;
+  let propSummaryConvertedTotal = 0;
+  for (item in propSummary) {
+    const fromCurrency =
+      propSummary[item].dataValues.property_valuation_currency;
+    const totalVal = parseInt(propSummary[item].dataValues.total);
+
+    const rateQuery = await getFXRateFromDB(fromCurrency, selectedCurrency);
+    const rate = rateQuery.currency_fxrate;
+    propSummaryConvertedTotal += totalVal * rate;
+  }
+  const returnNumber = parseInt(propSummaryConvertedTotal);
+
+  res.json(returnNumber);
+};
+
+exports.getInvestmentsTotal = async function (req, res, next) {
+  // investments will be + or 0, and so only need to request Pos db query:
+  const investSummary = await getPosInvestmentTotalsByCurrency(
+    res.locals.currentUser.id
+  );
+
+  const selectedCurrency = req.query.selectedcurrency;
+  let investSummaryConvertedTotal = 0;
+  for (item in investSummary) {
+    const fromCurrency = investSummary[item].dataValues.holding_currency_code;
+    const totalVal = parseInt(investSummary[item].dataValues.total);
+    const rateQuery = await getFXRateFromDB(fromCurrency, selectedCurrency);
+    const rate = rateQuery.currency_fxrate;
+    investSummaryConvertedTotal += totalVal * rate;
+  }
+
+  const returnNumber = parseInt(investSummaryConvertedTotal);
+
+  res.json(returnNumber);
 };
 
 exports.addNewProperty = function (req, res, next) {

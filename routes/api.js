@@ -7,6 +7,7 @@ var dbQueryController = require("../controllers/dbQueryController");
 router.post("/login", userController.logUserIn);
 router.get("/login/userauthenticationfailed", userController.loginFailure);
 router.get("/login/success", userController.loginSuccess);
+router.get("/logout", userController.logUserOut);
 
 router.post("/createaccount", userController.createUserAccount);
 
@@ -35,6 +36,12 @@ router.post(
   "/updatecashaccountbalance",
   dbQueryController.updateAccountBalance
 );
+
+router.get("/getcashaccountnettotal", dbQueryController.getCashAccountNetTotal);
+
+router.get("/getpropertynettotal", dbQueryController.getPropertyNetTotal);
+
+router.get("/getinvestmentsnettotal", dbQueryController.getInvestmentsTotal);
 
 router.get("/getinvestmentdata", dbQueryController.getInvestmentsData);
 
