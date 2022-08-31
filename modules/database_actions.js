@@ -1,19 +1,8 @@
 const { DateTime } = require("luxon");
 const { literal, Op, Sequelize } = require("sequelize");
-const cashAccounts = require("../models/cashAccounts");
 
-const sequelize = new Sequelize(
-  process.env.DATABASE_NAME,
-  process.env.RDS_USERNAME,
-  process.env.RDS_PASSWORD,
-  {
-    host: `${process.env.RDS_HOSTNAME}`,
-    dialect: "mysql",
-    logging: false,
-  }
-);
 // logging: console.log,
-
+const cashAccounts = require("../models/cashAccounts");
 const User = require("../models/user")(sequelize);
 const CashAccount = require("../models/cashAccounts")(sequelize);
 const CashAccountBalances = require("../models/cashAccountsBalances")(
@@ -52,16 +41,6 @@ CurrencyCodes.sync();
 PropertiesHistVals.sync();
 Investments.sync();
 InvestmentPriceHistory.sync();
-
-const connectoDB = async () => {
-  try {
-    await sequelize.authenticate();
-    console.log("Connection has been established successfully.");
-  } catch (error) {
-    console.error("Unable to connect to the database:", error);
-  }
-};
-connectoDB();
 
 module.exports = addNewCashAccountToDB = async (userID, requestBody) => {
   try {
@@ -223,6 +202,22 @@ module.exports = getCurrencyDataFromDB = async () => {
     });
     return currenciesCodesQuery;
   } catch (error) {
+    return error;
+  }
+};
+
+module.exports = getAllFXRatesFromDB = async () => {
+  try {
+    const currenciesQuery = await Currencies.findAll({
+      order: [["currency_code_from", "ASC"]],
+    });
+
+    const currenciesData = currenciesQuery.map(function (record) {
+      return record.dataValues;
+    });
+    return currenciesData;
+  } catch (error) {
+    console.log(error);
     return error;
   }
 };

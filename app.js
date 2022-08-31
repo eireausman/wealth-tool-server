@@ -10,7 +10,10 @@ const bcrypt = require("bcryptjs");
 const session = require("express-session");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
-const jwt = require("jsonwebtoken");
+
+// establish db connection:
+require("./modules/database_connect");
+connectoDB();
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
@@ -28,30 +31,45 @@ cron.schedule("59 * * * * *", () => {
   fxRateUpdater();
 });
 
+const SequelizeStore = require("connect-session-sequelize")(session.Store);
+var sqlSessionStore = new SequelizeStore({
+  db: sequelize,
+});
+
+app.use(
+  session({
+    secret: process.env.SQL_SESSION_SECRET,
+    store: sqlSessionStore,
+    resave: false,
+    saveUninitialized: true,
+  })
+);
+sqlSessionStore.sync();
+
 passport.use(
   new LocalStrategy((username, password, done) => {
     findOneUser("users_username", username).then((userData) => {
-      console.log("1111111");
+      console.log("user query completed");
       if (userData === false) {
-        console.log("2222222");
+        console.log("usename rejected");
         return done(null, false, { message: "Incorrect username" });
       }
       bcrypt.compare(password, userData.password, (err, res) => {
         if (res) {
           // passwords match! log user in
-          console.log("33333333");
+          console.log("passwords matched");
           const user = {
             id: userData.id,
           };
           return done(null, user);
         } else {
           // passwords do not match!
-          console.log("444444444");
+          console.log("password DO NOT match");
           return done(null, false, { message: "Incorrect password" });
         }
       });
     });
-    console.log("5555555555");
+    console.log("passport check complete - LOCAL STRATEGY");
   })
 );
 
@@ -69,13 +87,13 @@ passport.deserializeUser(function (id, done) {
   });
 });
 
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET_STRING,
-    resave: false,
-    saveUninitialized: true,
-  })
-);
+// app.use(
+//   session({
+//     secret: process.env.SESSION_SECRET_STRING,
+//     resave: false,
+//     saveUninitialized: true,
+//   })
+// );
 app.use(passport.initialize());
 app.use(passport.session());
 

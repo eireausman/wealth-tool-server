@@ -220,3 +220,13 @@ exports.getFXRate = function (req, res, next) {
     res.send(data);
   });
 };
+
+exports.getallFXRates = function (req, res, next) {
+  if (!res.locals.currentUser) {
+    res.sendStatus(403);
+  } else {
+    const currencyFXData = getAllFXRatesFromDB().then((data) => {
+      res.send(data);
+    });
+  }
+};

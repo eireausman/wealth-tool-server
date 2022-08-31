@@ -17,6 +17,8 @@ router.get("/getcashaccountdata", dbQueryController.getCashAccountData);
 // need to amend to get request
 router.post("/getfxrates", dbQueryController.getFXRate);
 
+router.get("/getallfxrates", dbQueryController.getallFXRates);
+
 router.get("/getcurrencycodes", dbQueryController.getCurrencyData);
 
 router.post("/addnewinvestment", dbQueryController.addNewInvestment);
