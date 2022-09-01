@@ -29,6 +29,10 @@ exports.addNewCashAccount = function (req, res, next) {
 };
 
 exports.getDebtTotalValue = async function (req, res, next) {
+  if (!res.locals.currentUser) {
+    res.sendStatus(403);
+    return;
+  }
   // investments cannot be in debt, so no query required.  Empty array provided to pass to totalsByCurr.
   // This is a bit messy. Refactoring isn't straight forward because a list of all currencies needs providing which is a combined view.
   // That happens downstream from here.
@@ -61,6 +65,11 @@ exports.getDebtTotalValue = async function (req, res, next) {
 };
 
 exports.getTotalPosAssetValue = async function (req, res, next) {
+  if (!res.locals.currentUser) {
+    res.sendStatus(403);
+    return;
+  }
+
   const investSummary = await getPosInvestmentTotalsByCurrency(
     res.locals.currentUser.id
   );
@@ -91,6 +100,10 @@ exports.getTotalPosAssetValue = async function (req, res, next) {
 };
 
 exports.getCashAccountNetTotal = async function (req, res, next) {
+  if (!res.locals.currentUser) {
+    res.sendStatus(403);
+    return;
+  }
   const CashAccSummary = await getNetCashAccountTotalsByCurrency(
     res.locals.currentUser.id
   );
@@ -112,6 +125,10 @@ exports.getCashAccountNetTotal = async function (req, res, next) {
 };
 
 exports.getPropertyNetTotal = async function (req, res, next) {
+  if (!res.locals.currentUser) {
+    res.sendStatus(403);
+    return;
+  }
   const propSummary = await getNetPropertyTotalsByCurrency(
     res.locals.currentUser.id
   );
@@ -133,6 +150,10 @@ exports.getPropertyNetTotal = async function (req, res, next) {
 };
 
 exports.getInvestmentsTotal = async function (req, res, next) {
+  if (!res.locals.currentUser) {
+    res.sendStatus(403);
+    return;
+  }
   // investments will be + or 0, and so only need to request Pos db query:
   const investSummary = await getPosInvestmentTotalsByCurrency(
     res.locals.currentUser.id
@@ -163,6 +184,10 @@ exports.addNewProperty = function (req, res, next) {
 };
 
 exports.getCashAccountData = function (req, res, next) {
+  if (!res.locals.currentUser) {
+    res.sendStatus(403);
+    return;
+  }
   const cashAccountData = getCashAccountDataFromDB(
     res.locals.currentUser.id
   ).then((data) => {
@@ -180,6 +205,7 @@ exports.updateAccountBalance = function (req, res, next) {
 };
 
 exports.updatePropValue = function (req, res, next) {
+  /// REQUIRES USER CHECK?
   const updateBalanceRequest = updatePropValueToDB(
     req.body.property_id,
     req.body.property_valuation,
@@ -190,6 +216,10 @@ exports.updatePropValue = function (req, res, next) {
 };
 
 exports.getPropertiesData = async function (req, res, next) {
+  if (!res.locals.currentUser) {
+    res.sendStatus(403);
+    return;
+  }
   const selectedCurrency = req.query.selectedcurrency;
 
   const propertyData = await getPropertyDataFromDB(res.locals.currentUser.id);
@@ -211,6 +241,10 @@ exports.getPropertiesData = async function (req, res, next) {
 };
 
 exports.getInvestmentsData = async function (req, res, next) {
+  if (!res.locals.currentUser) {
+    res.sendStatus(403);
+    return;
+  }
   const selectedCurrency = req.query.selectedcurrency;
 
   const investmentData = await getInvestmentDataFromDB(
@@ -235,12 +269,20 @@ exports.getInvestmentsData = async function (req, res, next) {
 };
 
 exports.getCurrencyData = function (req, res, next) {
+  if (!res.locals.currentUser) {
+    res.sendStatus(403);
+    return;
+  }
   const currencyCodeData = getCurrencyDataFromDB().then((data) => {
     res.send(data);
   });
 };
 
 exports.getFXRate = function (req, res, next) {
+  if (!res.locals.currentUser) {
+    res.sendStatus(403);
+    return;
+  }
   const currencyFXData = getFXRateFromDB(
     req.body.currencyFrom,
     req.body.currencyTo
@@ -252,6 +294,7 @@ exports.getFXRate = function (req, res, next) {
 exports.getallFXRates = function (req, res, next) {
   if (!res.locals.currentUser) {
     res.sendStatus(403);
+    return;
   } else {
     const currencyFXData = getAllFXRatesFromDB().then((data) => {
       res.send(data);

@@ -13,6 +13,18 @@ exports.createUserAccount = function (req, res, next) {
   });
 };
 
+exports.isUserLoggedIn = function (req, res, next) {
+  try {
+    if (res.locals.currentUser === undefined) {
+      res.json(false);
+    } else {
+      res.json(res.locals.currentUser.username);
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 // check if credentials are valid
 exports.logUserIn = function (req, res, next) {
   passport.authenticate("local", {

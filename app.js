@@ -81,6 +81,7 @@ passport.deserializeUser(function (id, done) {
   findOneUser("users_id", id).then((userData) => {
     const user = {
       id: userData.id,
+      username: userData.username,
     };
     const err = false;
     done(err, user);

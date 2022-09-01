@@ -215,6 +215,7 @@ module.exports = getAllFXRatesFromDB = async () => {
     const currenciesData = currenciesQuery.map(function (record) {
       return record.dataValues;
     });
+
     return currenciesData;
   } catch (error) {
     console.log(error);

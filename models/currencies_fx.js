@@ -52,6 +52,15 @@ module.exports = (sequelize) => {
           },
         },
       },
+      virtual_lastUpdatedWords: {
+        type: DataTypes.VIRTUAL,
+        get() {
+          return `${this.currency_code_from}${this.currency_code_to}`;
+        },
+        set(value) {
+          throw new Error("Do not try to set the virtual value!");
+        },
+      },
     },
     {
       timestamps: false,

@@ -9,6 +9,8 @@ router.get("/login/userauthenticationfailed", userController.loginFailure);
 router.get("/login/success", userController.loginSuccess);
 router.get("/logout", userController.logUserOut);
 
+router.get("/isuserloggedin", userController.isUserLoggedIn);
+
 router.post("/createaccount", userController.createUserAccount);
 
 router.get("/getpropertiesdata", dbQueryController.getPropertiesData);

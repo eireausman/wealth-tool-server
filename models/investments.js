@@ -1,5 +1,4 @@
 const { Sequelize, Op, Model, DataTypes } = require("sequelize");
-const exchangeRate = "2";
 
 module.exports = (sequelize) => {
   const Investments = sequelize.define(
