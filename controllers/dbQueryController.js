@@ -44,11 +44,25 @@ exports.getDebtTotalValue = async function (req, res, next) {
     res.locals.currentUser.id
   );
 
+  // if no entries exist, exit
+  if (!CashAccSummary && !propSummary) {
+    res.sendStatus(204);
+    return;
+  }
+  let CashAccSummaryArray = [];
+  if (CashAccSummary) {
+    JSON.parse(JSON.stringify(CashAccSummary.cash_accounts));
+  }
+  let propSummaryArray = [];
+  if (propSummary) {
+    propSummaryArray = JSON.parse(JSON.stringify(propSummary.properties));
+  }
+
   // combine the above and get a summary by currency rather than by asset type by currency
   const totalsByCurr = totalsCalc.calculateTotalsByCurr(
     investSummary,
-    CashAccSummary,
-    propSummary
+    CashAccSummaryArray,
+    propSummaryArray
   );
 
   // convert to the currently selected currency in front end and return the sum of converted values
@@ -79,11 +93,32 @@ exports.getTotalPosAssetValue = async function (req, res, next) {
     res.locals.currentUser.id
   );
 
+  // if no entries exist, exit
+  if (!investSummary && !CashAccSummary && !propSummary) {
+    res.sendStatus(204);
+    return;
+  }
+
+  let investSummaryArray = [];
+  if (investSummary) {
+    JSON.parse(JSON.stringify(investSummary.investments));
+  }
+  let CashAccSummaryArray = [];
+  if (CashAccSummary) {
+    CashAccSummaryArray = JSON.parse(
+      JSON.stringify(CashAccSummary.cash_accounts)
+    );
+  }
+  let propSummaryArray = [];
+  if (propSummary) {
+    const propSummaryArray = JSON.parse(JSON.stringify(propSummary.properties));
+  }
+
   // combine the above and get a summary by currency rather than by asset type by currency
   const totalsByCurr = totalsCalc.calculateTotalsByCurr(
-    investSummary,
-    CashAccSummary,
-    propSummary
+    investSummaryArray,
+    CashAccSummaryArray,
+    propSummaryArray
   );
 
   let convertedTotal = 0;
@@ -107,12 +142,21 @@ exports.getCashAccountNetTotal = async function (req, res, next) {
     res.locals.currentUser.id
   );
 
+  if (!CashAccSummary) {
+    res.sendStatus(204);
+    return;
+  }
+
+  CashAccSummaryArray = JSON.parse(
+    JSON.stringify(CashAccSummary.cash_accounts)
+  );
+
   const selectedCurrency = req.query.selectedcurrency;
   let CashAccSummaryConvertedTotal = 0;
 
-  for (item in CashAccSummary) {
-    const fromCurrency = CashAccSummary[item].dataValues.account_currency_code;
-    const totalVal = parseInt(CashAccSummary[item].dataValues.total);
+  for (item in CashAccSummaryArray) {
+    const fromCurrency = CashAccSummaryArray[item].account_currency_code;
+    const totalVal = parseInt(CashAccSummaryArray[item].total);
     const rateQuery = await getFXRateFromDB(fromCurrency, selectedCurrency);
     const rate = rateQuery.currency_fxrate;
 
@@ -132,12 +176,18 @@ exports.getPropertyNetTotal = async function (req, res, next) {
     res.locals.currentUser.id
   );
 
+  if (!propSummary) {
+    res.sendStatus(204);
+    return;
+  }
+  propSummaryArray = JSON.parse(JSON.stringify(propSummary.properties));
+  console.log(propSummaryArray);
+
   const selectedCurrency = req.query.selectedcurrency;
   let propSummaryConvertedTotal = 0;
-  for (item in propSummary) {
-    const fromCurrency =
-      propSummary[item].dataValues.property_valuation_currency;
-    const totalVal = parseInt(propSummary[item].dataValues.total);
+  for (item in propSummaryArray) {
+    const fromCurrency = propSummaryArray[item].property_valuation_currency;
+    const totalVal = parseInt(propSummaryArray[item].total);
 
     const rateQuery = await getFXRateFromDB(fromCurrency, selectedCurrency);
     const rate = rateQuery.currency_fxrate;
@@ -158,11 +208,18 @@ exports.getInvestmentsTotal = async function (req, res, next) {
     res.locals.currentUser.id
   );
 
+  if (!investSummary) {
+    res.sendStatus(204);
+    return;
+  }
+
+  investSummaryArray = JSON.parse(JSON.stringify(investSummary.investments));
+
   const selectedCurrency = req.query.selectedcurrency;
   let investSummaryConvertedTotal = 0;
-  for (item in investSummary) {
-    const fromCurrency = investSummary[item].dataValues.holding_currency_code;
-    const totalVal = parseInt(investSummary[item].dataValues.total);
+  for (item in investSummaryArray) {
+    const fromCurrency = investSummaryArray[item].holding_currency_code;
+    const totalVal = parseInt(investSummaryArray[item].total);
     const rateQuery = await getFXRateFromDB(fromCurrency, selectedCurrency);
     const rate = rateQuery.currency_fxrate;
     investSummaryConvertedTotal += totalVal * rate;
@@ -191,7 +248,14 @@ exports.getCashAccountData = async function (req, res, next) {
   const cashAccountData = await getCashAccountDataFromDB(
     res.locals.currentUser.id
   );
-  const cashAccountArrray = cashAccountData.cash_accounts;
+  if (!cashAccountData) {
+    res.sendStatus(204);
+    return;
+  }
+
+  const cashAccountArrray = JSON.parse(
+    JSON.stringify(cashAccountData.cash_accounts)
+  );
   // convert to the currency selected in front end
   const selectedCurrency = req.query.selectedcurrency;
 
@@ -263,7 +327,14 @@ exports.getInvestmentsData = async function (req, res, next) {
     res.locals.currentUser.id
   );
 
-  const investmentsArray = investmentData.investments;
+  if (!investmentData) {
+    res.sendStatus(204);
+    return;
+  }
+
+  const investmentsArray = JSON.parse(
+    JSON.stringify(investmentData.investments)
+  );
 
   // convert to the currency selected in front end
   for (let i = 0; i < investmentsArray.length; i += 1) {

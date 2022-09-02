@@ -387,16 +387,8 @@ module.exports = getInvestmentDataFromDB = async (reslocalsuser) => {
         },
       },
     });
-    const JSONoutput = JSON.stringify(usersInvestmentQuery, null, 2);
-    const queryOutputArray = JSON.parse(JSONoutput);
 
-    // returns an array of investments owned by the current user
-    // const usersInvestmentData = usersInvestmentQuery.investments.map(function (
-    //   record
-    // ) {
-    //   return record.dataValues;
-    // });
-    return await queryOutputArray;
+    return await usersInvestmentQuery;
   } catch (err) {
     return err;
   }
@@ -434,7 +426,7 @@ module.exports = getPosInvestmentTotalsByCurrency = async (reslocalsuser) => {
         ],
       },
     });
-    return await usersInvestmentData.investments;
+    return await usersInvestmentData;
   } catch (err) {
     console.log(err);
     return err;
@@ -462,7 +454,7 @@ module.exports = getDebtCashAccountTotalsByCurrency = async (reslocalsuser) => {
         ],
       },
     });
-    return await usersCashAccountData.cash_accounts;
+    return await usersCashAccountData;
   } catch (err) {
     console.log(err);
     return err;
@@ -496,7 +488,7 @@ module.exports = getDebtPropertyTotalsByCurrency = async (reslocalsuser) => {
         ],
       },
     });
-    return await usersPropertyValueData.properties;
+    return await usersPropertyValueData;
   } catch (err) {
     console.log(err);
     return err;
@@ -524,7 +516,7 @@ module.exports = getPosCashAccountTotalsByCurrency = async (reslocalsuser) => {
         ],
       },
     });
-    return await usersCashAccountData.cash_accounts;
+    return await usersCashAccountData;
   } catch (err) {
     console.log(err);
     return err;
@@ -550,7 +542,7 @@ module.exports = getPosPropertyTotalsByCurrency = async (reslocalsuser) => {
         ],
       },
     });
-    return await usersPropertyValueData.properties;
+    return await usersPropertyValueData;
   } catch (err) {
     console.log(err);
     return err;
@@ -575,7 +567,7 @@ module.exports = getNetCashAccountTotalsByCurrency = async (reslocalsuser) => {
         ],
       },
     });
-    return await usersCashAccountData.cash_accounts;
+    return await usersCashAccountData;
   } catch (err) {
     console.log(err);
     return err;
@@ -607,7 +599,7 @@ module.exports = getNetPropertyTotalsByCurrency = async (reslocalsuser) => {
         ],
       },
     });
-    return await usersPropertyValueData.properties;
+    return await usersPropertyValueData;
   } catch (err) {
     console.log(err);
     return err;
@@ -675,11 +667,9 @@ module.exports = getCashAccountDataFromDB = async (reslocalsuser) => {
         },
       },
     });
-    // have to stringify query to retrieve virtuals and then convert back to JS to convey to Front End
-    const JSONoutput = JSON.stringify(usersCashAccounts, null, 2);
-    const queryOutputArray = JSON.parse(JSONoutput);
+
     // returns an array of accounts owned by the current user
-    return queryOutputArray;
+    return usersCashAccounts;
   } catch (err) {
     return err;
   }
