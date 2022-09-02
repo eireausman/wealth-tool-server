@@ -1,4 +1,3 @@
-const { reduce, forEach } = require("async");
 const totalsCalc = require("../modules/totalsCalcs");
 require("../modules/database_actions");
 
@@ -183,16 +182,29 @@ exports.addNewProperty = function (req, res, next) {
   });
 };
 
-exports.getCashAccountData = function (req, res, next) {
+exports.getCashAccountData = async function (req, res, next) {
   if (!res.locals.currentUser) {
     res.sendStatus(403);
     return;
   }
-  const cashAccountData = getCashAccountDataFromDB(
+
+  const cashAccountData = await getCashAccountDataFromDB(
     res.locals.currentUser.id
-  ).then((data) => {
-    res.send(data);
-  });
+  );
+  const cashAccountArrray = cashAccountData.cash_accounts;
+  // convert to the currency selected in front end
+  const selectedCurrency = req.query.selectedcurrency;
+
+  for (let i = 0; i < cashAccountArrray.length; i += 1) {
+    const baseCurr = cashAccountArrray[i].account_currency_code;
+    const rate = await getFXRateFromDB(baseCurr, selectedCurrency);
+    const accountBalConvertedValue =
+      parseInt(cashAccountArrray[i].account_balance) * rate.currency_fxrate;
+    cashAccountArrray[i].accountBalConvertedValue = parseInt(
+      accountBalConvertedValue
+    );
+  }
+  res.send(cashAccountArrray);
 };
 
 exports.updateAccountBalance = function (req, res, next) {
@@ -251,21 +263,24 @@ exports.getInvestmentsData = async function (req, res, next) {
     res.locals.currentUser.id
   );
 
-  for (let i = 0; i < investmentData.length; i += 1) {
-    const invest_baseCurr = investmentData[i].holding_currency_code;
+  const investmentsArray = investmentData.investments;
+
+  // convert to the currency selected in front end
+  for (let i = 0; i < investmentsArray.length; i += 1) {
+    const invest_baseCurr = investmentsArray[i].holding_currency_code;
     const invest_rate = await getFXRateFromDB(
       invest_baseCurr,
       selectedCurrency
     );
 
-    const invest_totalConvertedValue =
-      parseInt(investmentData[i].virtual_BaseCurrencyValue) *
+    const investmentConvertedValue =
+      parseInt(investmentsArray[i].virtual_BaseCurrencyValue) *
       invest_rate.currency_fxrate;
-    investmentData[i].investmentValuationInSelCurr = parseInt(
-      invest_totalConvertedValue
+    investmentsArray[i].investmentConvertedValue = parseInt(
+      investmentConvertedValue
     );
   }
-  res.send(investmentData);
+  res.send(investmentsArray);
 };
 
 exports.getCurrencyData = function (req, res, next) {

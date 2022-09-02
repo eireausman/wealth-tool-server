@@ -212,11 +212,11 @@ module.exports = getAllFXRatesFromDB = async () => {
       order: [["currency_code_from", "ASC"]],
     });
 
-    const currenciesData = currenciesQuery.map(function (record) {
-      return record.dataValues;
-    });
+    // have to stringify query to retrieve virtuals and then convert back to JS to convey to Front End
+    const JSONoutput = JSON.stringify(currenciesQuery, null, 2);
+    const queryOutputArray = JSON.parse(JSONoutput);
 
-    return currenciesData;
+    return queryOutputArray;
   } catch (error) {
     console.log(error);
     return error;
@@ -387,14 +387,16 @@ module.exports = getInvestmentDataFromDB = async (reslocalsuser) => {
         },
       },
     });
+    const JSONoutput = JSON.stringify(usersInvestmentQuery, null, 2);
+    const queryOutputArray = JSON.parse(JSONoutput);
 
     // returns an array of investments owned by the current user
-    const usersInvestmentData = usersInvestmentQuery.investments.map(function (
-      record
-    ) {
-      return record.dataValues;
-    });
-    return await usersInvestmentData;
+    // const usersInvestmentData = usersInvestmentQuery.investments.map(function (
+    //   record
+    // ) {
+    //   return record.dataValues;
+    // });
+    return await queryOutputArray;
   } catch (err) {
     return err;
   }
@@ -673,9 +675,11 @@ module.exports = getCashAccountDataFromDB = async (reslocalsuser) => {
         },
       },
     });
-
+    // have to stringify query to retrieve virtuals and then convert back to JS to convey to Front End
+    const JSONoutput = JSON.stringify(usersCashAccounts, null, 2);
+    const queryOutputArray = JSON.parse(JSONoutput);
     // returns an array of accounts owned by the current user
-    return usersCashAccounts.cash_accounts;
+    return queryOutputArray;
   } catch (err) {
     return err;
   }
